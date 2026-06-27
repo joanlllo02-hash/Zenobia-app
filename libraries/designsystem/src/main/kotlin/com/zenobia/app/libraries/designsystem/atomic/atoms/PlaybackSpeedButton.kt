@@ -1,0 +1,75 @@
+/*
+ * Copyright (c) 2025 Element Creations Ltd.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+ * Please see LICENSE files in the repository root for full details.
+ */
+
+package com.zenobia.app.libraries.designsystem.atomic.atoms
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+import com.zenobia.app.compound.theme.ZenobiaTheme
+import com.zenobia.app.libraries.designsystem.preview.ZenobiaPreview
+import com.zenobia.app.libraries.designsystem.preview.PreviewsDayNight
+import com.zenobia.app.libraries.designsystem.theme.components.Text
+import com.zenobia.app.libraries.designsystem.theme.messageFromMeBackground
+
+@Composable
+fun PlaybackSpeedButton(
+    speed: Float,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val speedText = when (speed) {
+        0.5f -> "0.5×"
+        1.0f -> "1×"
+        1.5f -> "1.5×"
+        2.0f -> "2×"
+        else -> "$speed×"
+    }
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(
+                color = ZenobiaTheme.colors.bgCanvasDefault,
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = speedText,
+            color = ZenobiaTheme.colors.iconSecondary,
+            style = ZenobiaTheme.typography.fontBodyXsMedium,
+        )
+    }
+}
+
+@PreviewsDayNight
+@Composable
+internal fun PlaybackSpeedButtonPreview() = ZenobiaPreview {
+    Row(
+        modifier = Modifier
+            .background(ZenobiaTheme.colors.messageFromMeBackground)
+            .padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        listOf(0.5f, 1.0f, 1.5f, 2.0f, 3.0f).forEach { speed ->
+            PlaybackSpeedButton(
+                speed = speed,
+                onClick = {},
+            )
+        }
+    }
+}

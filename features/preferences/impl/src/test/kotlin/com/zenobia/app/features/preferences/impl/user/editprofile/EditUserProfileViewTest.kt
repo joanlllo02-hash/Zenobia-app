@@ -1,0 +1,134 @@
+/*
+ * Copyright (c) 2025 Element Creations Ltd.
+ * Copyright 2023-2025 New Vector Ltd.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+ * Please see LICENSE files in the repository root for full details.
+ */
+
+@file:OptIn(ExperimentalTestApi::class)
+
+package com.zenobia.app.features.preferences.impl.user.editprofile
+
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.AndroidComposeUiTest
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.v2.runAndroidComposeUiTest
+import com.zenobia.app.libraries.architecture.AsyncAction
+import com.zenobia.app.libraries.matrix.ui.media.AvatarAction
+import com.zenobia.app.libraries.ui.strings.CommonStrings
+import com.zenobia.app.tests.testutils.EnsureNeverCalled
+import com.zenobia.app.tests.testutils.EventsRecorder
+import com.zenobia.app.tests.testutils.clickOn
+import com.zenobia.app.tests.testutils.ensureCalledOnce
+import com.zenobia.app.tests.testutils.pressBack
+import com.zenobia.app.tests.testutils.robolectric.RobolectricTest
+import org.junit.Test
+
+class EditUserProfileViewTest : RobolectricTest() {
+    @Test
+    fun `clicking on back emits the expected event`() = runAndroidComposeUiTest {
+        val eventsRecorder = EventsRecorder<EditUserProfileEvent>()
+        setEditUserProfileView(
+            aEditUserProfileState(
+                eventSink = eventsRecorder,
+            ),
+        )
+        pressBack()
+        eventsRecorder.assertSingle(EditUserProfileEvent.Exit)
+    }
+
+    @Test
+    fun `clicking on save from the exit confirmation dialog emits the expected event`() = runAndroidComposeUiTest {
+        val eventsRecorder = EventsRecorder<EditUserProfileEvent>()
+        setEditUserProfileView(
+            aEditUserProfileState(
+                saveAction = AsyncAction.ConfirmingCancellation,
+                eventSink = eventsRecorder,
+            ),
+        )
+        clickOn(CommonStrings.action_save, inDialog = true)
+        eventsRecorder.assertSingle(EditUserProfileEvent.Save)
+    }
+
+    @Test
+    fun `clicking on discard exit emits the expected event`() = runAndroidComposeUiTest {
+        val eventsRecorder = EventsRecorder<EditUserProfileEvent>()
+        setEditUserProfileView(
+            aEditUserProfileState(
+                saveAction = AsyncAction.ConfirmingCancellation,
+                eventSink = eventsRecorder,
+            ),
+        )
+        clickOn(CommonStrings.action_discard)
+        eventsRecorder.assertSingle(EditUserProfileEvent.Exit)
+    }
+
+    @Test
+    fun `clicking on save emits the expected event`() = runAndroidComposeUiTest {
+        val eventsRecorder = EventsRecorder<EditUserProfileEvent>()
+        setEditUserProfileView(
+            aEditUserProfileState(
+                saveButtonEnabled = true,
+                saveAction = AsyncAction.Uninitialized,
+                eventSink = eventsRecorder,
+            ),
+        )
+        clickOn(CommonStrings.action_save)
+        eventsRecorder.assertSingle(EditUserProfileEvent.Save)
+    }
+
+    @Test
+    fun `clicking on avatar opens the bottom sheet dialog`() = runAndroidComposeUiTest {
+        val eventsRecorder = EventsRecorder<EditUserProfileEvent>()
+        val actions = listOf(
+            AvatarAction.TakePhoto,
+            AvatarAction.ChoosePhoto,
+            AvatarAction.Remove,
+        )
+        setEditUserProfileView(
+            aEditUserProfileState(
+                saveAction = AsyncAction.Uninitialized,
+                avatarActions = actions,
+                eventSink = eventsRecorder,
+            ),
+        )
+        val resources = activity!!.resources
+        val contentDescription = resources.getString(CommonStrings.a11y_avatar)
+        onNodeWithContentDescription(contentDescription).performClick()
+        // Assert that the actions are displayed
+        actions.forEach { action ->
+            val text = resources.getString(action.titleResId)
+            onNodeWithText(text).assertExists()
+        }
+    }
+
+    @Test
+    fun `success invokes the expected callback`() = runAndroidComposeUiTest {
+        val eventsRecorder = EventsRecorder<EditUserProfileEvent>(expectEvents = false)
+        ensureCalledOnce { callback ->
+            setEditUserProfileView(
+                aEditUserProfileState(
+                    saveAction = AsyncAction.Success(Unit),
+                    eventSink = eventsRecorder,
+                ),
+                onEditProfileSuccess = callback,
+            )
+        }
+    }
+}
+
+private fun AndroidComposeUiTest<ComponentActivity>.setEditUserProfileView(
+    state: EditUserProfileState,
+    onEditProfileSuccess: () -> Unit = EnsureNeverCalled(),
+) {
+    setContent {
+        EditUserProfileView(
+            state = state,
+            onEditProfileSuccess = onEditProfileSuccess,
+        )
+    }
+}

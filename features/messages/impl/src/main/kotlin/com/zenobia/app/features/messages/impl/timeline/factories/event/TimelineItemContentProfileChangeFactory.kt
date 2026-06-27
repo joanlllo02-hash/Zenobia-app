@@ -1,0 +1,27 @@
+/*
+ * Copyright (c) 2025 Element Creations Ltd.
+ * Copyright 2023-2025 New Vector Ltd.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+ * Please see LICENSE files in the repository root for full details.
+ */
+
+package com.zenobia.app.features.messages.impl.timeline.factories.event
+
+import dev.zacsweers.metro.Inject
+import com.zenobia.app.features.messages.impl.timeline.model.event.TimelineItemEventContent
+import com.zenobia.app.features.messages.impl.timeline.model.event.TimelineItemProfileChangeContent
+import com.zenobia.app.libraries.core.extensions.orEmpty
+import com.zenobia.app.libraries.eventformatter.api.TimelineEventFormatter
+import com.zenobia.app.libraries.matrix.api.core.UserId
+import com.zenobia.app.libraries.matrix.api.timeline.item.event.EventContent
+
+@Inject
+class TimelineItemContentProfileChangeFactory(
+    private val timelineEventFormatter: TimelineEventFormatter,
+) {
+    fun create(content: EventContent, isOutgoing: Boolean, sender: UserId, senderDisambiguatedDisplayName: String): TimelineItemEventContent {
+        val text = timelineEventFormatter.format(content, isOutgoing, sender, senderDisambiguatedDisplayName)
+        return TimelineItemProfileChangeContent(text.orEmpty().toString())
+    }
+}

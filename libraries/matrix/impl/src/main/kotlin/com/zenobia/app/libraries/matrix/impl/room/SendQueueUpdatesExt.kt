@@ -1,0 +1,29 @@
+/*
+ * Copyright (c) 2025 Element Creations Ltd.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+ * Please see LICENSE files in the repository root for full details.
+ */
+
+package com.zenobia.app.libraries.matrix.impl.room
+
+import com.zenobia.app.libraries.matrix.api.core.EventId
+import com.zenobia.app.libraries.matrix.api.core.TransactionId
+import com.zenobia.app.libraries.matrix.api.room.SendQueueUpdate
+import com.zenobia.app.libraries.matrix.impl.media.map
+import org.matrix.rustcomponents.sdk.RoomSendQueueUpdate
+
+fun RoomSendQueueUpdate.map(): SendQueueUpdate = when (this) {
+    is RoomSendQueueUpdate.NewLocalEvent -> SendQueueUpdate.NewLocalEvent(TransactionId(transactionId))
+    is RoomSendQueueUpdate.CancelledLocalEvent -> SendQueueUpdate.CancelledLocalEvent(TransactionId(transactionId))
+    is RoomSendQueueUpdate.MediaUpload -> SendQueueUpdate.MediaUpload(
+        relatedTo = TransactionId(relatedTo),
+        file = file?.map(),
+        index = index.toLong(),
+        progress = progress.current.toFloat() / progress.total.toFloat(),
+    )
+    is RoomSendQueueUpdate.ReplacedLocalEvent -> SendQueueUpdate.ReplacedLocalEvent(TransactionId(transactionId))
+    is RoomSendQueueUpdate.RetryEvent -> SendQueueUpdate.RetrySendingEvent(TransactionId(transactionId))
+    is RoomSendQueueUpdate.SendError -> SendQueueUpdate.SendError(TransactionId(transactionId))
+    is RoomSendQueueUpdate.SentEvent -> SendQueueUpdate.SentEvent(TransactionId(transactionId), EventId(eventId))
+}

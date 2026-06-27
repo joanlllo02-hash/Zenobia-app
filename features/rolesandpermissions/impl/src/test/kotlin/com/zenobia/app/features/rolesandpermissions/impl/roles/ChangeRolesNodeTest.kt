@@ -1,0 +1,26 @@
+/*
+ * Copyright (c) 2025 Element Creations Ltd.
+ * Copyright 2025 New Vector Ltd.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+ * Please see LICENSE files in the repository root for full details.
+ */
+
+package com.zenobia.app.features.rolesandpermissions.impl.roles
+
+import com.google.common.truth.Truth.assertThat
+import com.zenobia.app.features.rolesandpermissions.api.ChangeRoomMemberRolesListType
+import com.zenobia.app.libraries.matrix.api.room.RoomMember
+import org.junit.Test
+
+class ChangeRolesNodeTest {
+    @Test
+    fun `test toRoomMemberRole`() {
+        assertThat(ChangeRoomMemberRolesListType.Admins.toRoomMemberRole())
+            .isEqualTo(RoomMember.Role.Admin)
+        assertThat(ChangeRoomMemberRolesListType.Moderators.toRoomMemberRole())
+            .isEqualTo(RoomMember.Role.Moderator)
+        assertThat(ChangeRoomMemberRolesListType.SelectNewOwnersWhenLeaving.toRoomMemberRole())
+            .isEqualTo(RoomMember.Role.Owner(false))
+    }
+}
