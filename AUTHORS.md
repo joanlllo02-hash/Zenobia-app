@@ -1,21 +1,28 @@
-# Zenobia - Authors
+# 👑 Zenobia — Authors
 
-## Project Maintainer
+## المطور الرئيسي — Project Maintainer
 
 - **7X** (https://github.com/7xze)
+- **فخر برمجة سورية**
+- فريق **Zenobia**
 
-## Original Project
+## حقوق الملكية — Copyright
 
-Zenobia is based on [Element X Android](https://github.com/element-hq/element-x-android), originally developed by:
+```
+© 2026-2027 7X. All rights reserved.
+فخر برمجة سورية — شركة 7X
+```
+
+## الإسناد القانوني — Legal Attribution
+
+This project incorporates code originally developed by:
 
 - **Element Creations Ltd.**
 - **New Vector Ltd.**
-- **Community Contributors**
 
-## Copyright
+Please refer to individual source file headers for specific copyright notices as required by the AGPL-3.0 license.
 
-Copyright (c) 2026-2027 7X. All rights reserved.
-Copyright (c) 2025 Element Creations Ltd.
-Copyright 2022-2025 New Vector Ltd.
+## المساهمون — Contributors
 
+لائحة المساهمين متوفرة في سجل الـ Git:
 For a full list of contributors, please refer to the git history.
