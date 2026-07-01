@@ -56,11 +56,23 @@ jobs:
         run: $ANDROID_HOME/tools/bin/sdkmanager --list --installed 2>&1 | grep -E "platforms|build-tools" || true
 
       - name: Build Debug APK
-        run: ./gradlew assembleGplayDebug --stacktrace --no-daemon 2>&1 | tail -100
+        run: ./gradlew assembleGplayDebug --stacktrace --no-daemon 2>&1
+
+      - name: List output files
+        if: success()
+        run: |
+          echo "=== APK output tree ==="
+          find app/build/outputs -name "*.apk" 2>/dev/null || echo "No APK files found"
+          echo "=== Full output tree ==="
+          find app/build/outputs -type f 2>/dev/null | head -50 || echo "No output files"
+          echo "=== Check build/intermediates ==="
+          ls -la app/build/intermediates/apk/ 2>/dev/null || echo "No intermediates/apk"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         if: success()
         with:
           name: zenobia-debug-apk
-          path: app/build/outputs/apk/gplay/debug/*.apk
+          path: |
+            app/build/outputs/apk/**/*.apk
+            app/build/outputs/apk/*.apk
