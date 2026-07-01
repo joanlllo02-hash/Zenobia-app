@@ -10,7 +10,7 @@ package com.zenobia.app.libraries.recentemojis.test
 
 import com.zenobia.app.emojibasebindings.Emoji
 import com.zenobia.app.emojibasebindings.EmojibaseCategory
-import com.zenobia.app.emojibasebindings.EmojibaseStore
+import io.element.android.emojibasebindings.EmojibaseStore
 import com.zenobia.app.libraries.recentemojis.api.EmojibaseProvider
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentMap

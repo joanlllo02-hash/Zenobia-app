@@ -31,7 +31,7 @@ import androidx.compose.ui.test.v2.runAndroidComposeUiTest
 import androidx.compose.ui.text.AnnotatedString
 import com.zenobia.app.emojibasebindings.Emoji
 import com.zenobia.app.emojibasebindings.EmojibaseCategory
-import com.zenobia.app.emojibasebindings.EmojibaseStore
+import io.element.android.emojibasebindings.EmojibaseStore
 import com.zenobia.app.features.messages.impl.actionlist.ActionListEvent
 import com.zenobia.app.features.messages.impl.actionlist.ActionListState
 import com.zenobia.app.features.messages.impl.actionlist.anActionListState

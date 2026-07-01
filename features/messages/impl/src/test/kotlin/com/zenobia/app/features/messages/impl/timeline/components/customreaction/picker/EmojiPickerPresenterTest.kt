@@ -21,7 +21,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.zenobia.app.emojibasebindings.Emoji
 import com.zenobia.app.emojibasebindings.EmojibaseCategory
-import com.zenobia.app.emojibasebindings.EmojibaseStore
+import io.element.android.emojibasebindings.EmojibaseStore
 import com.zenobia.app.libraries.designsystem.theme.components.SearchBarResultState
 import com.zenobia.app.tests.testutils.WarmUpRule
 import com.zenobia.app.tests.testutils.robolectric.RobolectricTest

@@ -8,7 +8,7 @@
 
 package com.zenobia.app.features.messages.impl.timeline.components.customreaction
 
-import com.zenobia.app.emojibasebindings.EmojibaseStore
+import io.element.android.emojibasebindings.EmojibaseStore
 import com.zenobia.app.features.messages.impl.timeline.model.TimelineItem
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet

@@ -8,7 +8,7 @@
 
 package com.zenobia.app.libraries.recentemojis.api
 
-import com.zenobia.app.emojibasebindings.EmojibaseStore
+import io.element.android.emojibasebindings.EmojibaseStore
 
 interface EmojibaseProvider {
     val emojibaseStore: EmojibaseStore
