@@ -43,8 +43,8 @@ fun Project.setupDependencyInjection(
 
 // These dependencies should only be needed for compose library or application modules
 private fun Project.shouldApplyAppyxCodegen(): Boolean {
-    return project.pluginManager.hasPlugin("com.zenobia.app-compose-library")
-        || project.pluginManager.hasPlugin("com.zenobia.app-compose-application")
+    return project.pluginManager.hasPlugin("com.zenobia.android-compose-library")
+        || project.pluginManager.hasPlugin("com.zenobia.android-compose-application")
 }
 
 private fun Project.applyPluginIfNeeded(plugin: Provider<PluginDependency>) {
