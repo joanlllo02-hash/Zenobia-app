@@ -38,7 +38,7 @@ jobs:
           sdkmanager --install "platforms;android-37" "build-tools;37.0.0" 2>&1 | tail -5
 
       - name: Build Debug APK
-        run: ./gradlew assembleGplayDebug --stacktrace
+        run: ./gradlew assembleGplayDebug --stacktrace -Dorg.gradle.java.home=$JAVA_HOME
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
