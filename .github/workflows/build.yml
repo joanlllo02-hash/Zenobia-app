@@ -35,10 +35,16 @@ jobs:
       - name: Accept licenses & install SDK components
         run: |
           yes | sdkmanager --licenses > /dev/null 2>&1
-          sdkmanager --install "platforms;android-37" "build-tools;37.0.0" 2>&1 | tail -5
+          sdkmanager --install "platforms;android-37" "build-tools;37.0.0" "ndk;27.0.12077973" "cmake;3.22.1" 2>&1 | tail -5
+
+      - name: Remove hardcoded JDK path & configure CI
+        run: |
+          sed -i '/org.gradle.java.home/d' gradle.properties
+          echo "org.gradle.caching=false" >> gradle.properties
+          echo "org.gradle.configuration-cache=false" >> gradle.properties
 
       - name: Build Debug APK
-        run: ./gradlew assembleGplayDebug --stacktrace -Dorg.gradle.java.home=$JAVA_HOME
+        run: ./gradlew assembleGplayDebug --stacktrace --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
