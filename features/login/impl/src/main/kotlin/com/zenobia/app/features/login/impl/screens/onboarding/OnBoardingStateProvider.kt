@@ -9,6 +9,11 @@
 package com.zenobia.app.features.login.impl.screens.onboarding
 
 import androidx.annotation.DrawableRes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.zenobia.app.features.login.impl.login.LoginMode
 import com.zenobia.app.libraries.architecture.AsyncData
@@ -18,25 +23,51 @@ open class OnBoardingStateProvider : PreviewParameterProvider<OnBoardingState> {
     override val values: Sequence<OnBoardingState>
         get() = sequenceOf(
             anOnBoardingState(),
-            anOnBoardingState(canLoginWithQrCode = true),
-            anOnBoardingState(canCreateAccount = true),
-            anOnBoardingState(canLoginWithQrCode = true, canCreateAccount = true),
-            anOnBoardingState(canLoginWithQrCode = true, canCreateAccount = true, canReportBug = true),
-            anOnBoardingState(defaultAccountProvider = "element.io", canCreateAccount = false, canReportBug = true),
-            anOnBoardingState(customLogoResId = R.drawable.sample_background),
             anOnBoardingState(
+                step = OnBoardingStep.WELCOME,
+                canLoginWithQrCode = true,
+                canCreateAccount = true,
+            ),
+            anOnBoardingState(
+                step = OnBoardingStep.WELCOME,
+                canLoginWithQrCode = true,
+                canCreateAccount = true,
+                canReportBug = true,
+            ),
+            anOnBoardingState(
+                step = OnBoardingStep.WELCOME,
+                defaultAccountProvider = "matrix.org",
+                canCreateAccount = false,
+                canReportBug = true,
+            ),
+            anOnBoardingState(
+                step = OnBoardingStep.WELCOME,
+                customLogoResId = R.drawable.sample_background,
+            ),
+            anOnBoardingState(
+                step = OnBoardingStep.WELCOME,
                 isAddingAccount = true,
                 canLoginWithQrCode = true,
                 canCreateAccount = true,
             ),
             anOnBoardingState(
-                showBackButton = true,
-                showDeveloperSettings = true,
+                step = OnBoardingStep.INTRO_CAROUSEL,
+                currentSlideIndex = 0,
+            ),
+            anOnBoardingState(
+                step = OnBoardingStep.INTRO_CAROUSEL,
+                currentSlideIndex = 1,
+            ),
+            anOnBoardingState(
+                step = OnBoardingStep.INTRO_CAROUSEL,
+                currentSlideIndex = 2,
             ),
         )
 }
 
 fun anOnBoardingState(
+    step: OnBoardingStep = OnBoardingStep.WELCOME,
+    currentSlideIndex: Int = 0,
     isAddingAccount: Boolean = false,
     showBackButton: Boolean = false,
     showDeveloperSettings: Boolean = false,
@@ -53,6 +84,29 @@ fun anOnBoardingState(
     loginMode: AsyncData<LoginMode> = AsyncData.Uninitialized,
     eventSink: (OnBoardingEvents) -> Unit = {},
 ) = OnBoardingState(
+    step = step,
+    currentSlideIndex = currentSlideIndex,
+    slideCount = 3,
+    slides = listOf(
+        IntroSlide(
+            icon = Icons.Default.Lock,
+            title = "الخصوصية والأمان",
+            description = "تشفير كامل من البداية إلى النهاية. أنت فقط من يملك مفتاح محادثاتك.",
+            accentColor = 0xFF0DBDA8,
+        ),
+        IntroSlide(
+            icon = Icons.Default.Language,
+            title = "تواصل لا مركزي",
+            description = "لا خوادم مركزية. شبكة Matrix الموزعة تمنحك الحرية الكاملة لبياناتك.",
+            accentColor = 0xFF0D5CBD,
+        ),
+        IntroSlide(
+            icon = Icons.Default.Star,
+            title = "ميزات متقدمة",
+            description = "غرف، مساحات، مكالمات صوت ومرئي، مشاركة ملفات، بوتات ذكية والمزيد.",
+            accentColor = 0xFF8B5CF6,
+        ),
+    ),
     isAddingAccount = isAddingAccount,
     showBackButton = showBackButton,
     showDeveloperSettings = showDeveloperSettings,

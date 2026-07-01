@@ -8,6 +8,10 @@
 
 package com.zenobia.app.features.login.impl.screens.onboarding
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -63,8 +67,6 @@ class OnBoardingPresenter(
     override fun present(): OnBoardingState {
         val localCoroutineScope = rememberCoroutineScope()
         val forcedAccountProvider = remember {
-            // If defaultHomeserverList() returns a singleton list, this is the default account provider.
-            // In this case, the user can sign in using this homeserver, or use QrCode login
             enterpriseService.defaultHomeserverList().singleOrNull()
         }
         val canConnectToAnyHomeserver = remember {
@@ -74,7 +76,6 @@ class OnBoardingPresenter(
             !canConnectToAnyHomeserver && enterpriseService.defaultHomeserverList().size > 1
         }
         val linkAccountProvider by produceState<String?>(initialValue = null) {
-            // Account provider from the link, if allowed by the enterprise service
             value = params.accountProvider?.takeIf {
                 try {
                     defaultAccountProviderAccessControl.assertIsAllowedToConnectToAccountProvider(it, it)
@@ -85,8 +86,6 @@ class OnBoardingPresenter(
             }
         }
         val defaultAccountProvider = remember(linkAccountProvider) {
-            // If there is a forced account provider, this is the default account provider
-            // Else use the account provider passed in the params if any and if allowed
             forcedAccountProvider ?: linkAccountProvider
         }
         val canLoginWithQrCode by produceState(initialValue = false, linkAccountProvider) {
@@ -98,16 +97,39 @@ class OnBoardingPresenter(
             onBoardingLogoResIdProvider.get()
         }
         val isAddingAccount by produceState(initialValue = false) {
-            // We are adding an account if there is at least one session already stored
             value = sessionStore.numberOfSessions() > 0
         }
-
         val loginMode by loginHelper.collectLoginMode()
+
+        var step by rememberSaveable { mutableStateOf(OnBoardingStep.INTRO_CAROUSEL) }
+        var currentSlideIndex by rememberSaveable { mutableStateOf(0) }
+
+        val slides = remember {
+            listOf(
+                IntroSlide(
+                    icon = Icons.Default.Lock,
+                    title = "الخصوصية والأمان",
+                    description = "تشفير كامل من البداية إلى النهاية. أنت فقط من يملك مفتاح محادثاتك.",
+                    accentColor = 0xFF0DBDA8,
+                ),
+                IntroSlide(
+                    icon = Icons.Default.Language,
+                    title = "تواصل لا مركزي",
+                    description = "لا خوادم مركزية. شبكة Matrix الموزعة تمنحك الحرية الكاملة لبياناتك.",
+                    accentColor = 0xFF0D5CBD,
+                ),
+                IntroSlide(
+                    icon = Icons.Default.Star,
+                    title = "ميزات متقدمة",
+                    description = "غرف، مساحات، مكالمات صوت ومرئي، مشاركة ملفات، بوتات ذكية والمزيد.",
+                    accentColor = 0xFF8B5CF6,
+                ),
+            )
+        }
 
         fun handleEvent(event: OnBoardingEvents) {
             when (event) {
                 is OnBoardingEvents.OnSignIn -> localCoroutineScope.launch {
-                    // Ensure that the current account provider is set
                     accountProviderDataSource.setUrl(event.defaultAccountProvider)
                     loginHelper.submit(
                         isAccountCreation = false,
@@ -127,10 +149,31 @@ class OnBoardingPresenter(
                 OnBoardingEvents.OnDevSignIn -> localCoroutineScope.launch {
                     devLogin()
                 }
+                OnBoardingEvents.OnSkipCarousel,
+                OnBoardingEvents.OnGetStarted -> {
+                    step = OnBoardingStep.WELCOME
+                }
+                is OnBoardingEvents.OnCarouselSlideChange -> {
+                    currentSlideIndex = event.index
+                }
+                OnBoardingEvents.OnNextSlide -> {
+                    if (currentSlideIndex < slides.size - 1) {
+                        currentSlideIndex++
+                    } else {
+                        step = OnBoardingStep.WELCOME
+                    }
+                }
+                OnBoardingEvents.OnBackToCarousel -> {
+                    step = OnBoardingStep.INTRO_CAROUSEL
+                }
             }
         }
 
         return OnBoardingState(
+            step = step,
+            currentSlideIndex = currentSlideIndex,
+            slideCount = slides.size,
+            slides = slides,
             isAddingAccount = isAddingAccount,
             showBackButton = params.showBackButton,
             showDeveloperSettings = buildMeta.buildType != BuildType.RELEASE,

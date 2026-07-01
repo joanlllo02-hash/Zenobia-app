@@ -9,10 +9,27 @@
 package com.zenobia.app.features.login.impl.screens.onboarding
 
 import androidx.annotation.DrawableRes
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.zenobia.app.features.login.impl.login.LoginMode
 import com.zenobia.app.libraries.architecture.AsyncData
 
+enum class OnBoardingStep {
+    INTRO_CAROUSEL,
+    WELCOME,
+}
+
+data class IntroSlide(
+    val icon: ImageVector,
+    val title: String,
+    val description: String,
+    val accentColor: Long,
+)
+
 data class OnBoardingState(
+    val step: OnBoardingStep,
+    val currentSlideIndex: Int,
+    val slideCount: Int,
+    val slides: List<IntroSlide>,
     val isAddingAccount: Boolean,
     val showBackButton: Boolean,
     val showDeveloperSettings: Boolean,

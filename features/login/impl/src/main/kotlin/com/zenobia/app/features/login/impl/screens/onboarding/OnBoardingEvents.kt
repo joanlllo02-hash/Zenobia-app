@@ -16,4 +16,9 @@ sealed interface OnBoardingEvents {
     data object OnVersionClick : OnBoardingEvents
     data object ClearError : OnBoardingEvents
     data object OnDevSignIn : OnBoardingEvents
+    data object OnSkipCarousel : OnBoardingEvents
+    data class OnCarouselSlideChange(val index: Int) : OnBoardingEvents
+    data object OnNextSlide : OnBoardingEvents
+    data object OnGetStarted : OnBoardingEvents
+    data object OnBackToCarousel : OnBoardingEvents
 }
