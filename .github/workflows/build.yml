@@ -21,97 +21,29 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('*.gradle.kts', 'gradle/libs.versions.toml') }}
-          restore-keys: ${{ runner.os }}-gradle-
-
       - name: Fix gradle.properties for CI
         run: |
           sed -i '/org.gradle.java.home/d' gradle.properties
           sed -i '/org.gradle.caching/d' gradle.properties
           sed -i '/org.gradle.configuration-cache/d' gradle.properties
 
-      - name: Setup Android SDK
+      - name: Accept licenses & install SDK
         run: |
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> $GITHUB_ENV
-
-      - name: Find sdkmanager
-        run: |
-          find /usr/local/lib/android/sdk -name "sdkmanager" -type f 2>/dev/null || echo "sdkmanager not found"
-          ls -la /usr/local/lib/android/sdk/ 2>/dev/null || echo "SDK root not found"
-
-      - name: Accept licenses
-        run: |
-          SDKMANAGER=$(find /usr/local/lib/android/sdk -name "sdkmanager" -type f 2>/dev/null | head -1)
-          if [ -n "$SDKMANAGER" ]; then
-            yes | $SDKMANAGER --licenses > /dev/null 2>&1 || true
-          else
-            echo "No sdkmanager found, skipping license accept"
-          fi
-
-      - name: Check available platforms
-        run: |
-          SDKMANAGER=$(find /usr/local/lib/android/sdk -name "sdkmanager" -type f 2>/dev/null | head -1)
-          if [ -n "$SDKMANAGER" ]; then
-            echo "=== Available platforms ==="
-            $SDKMANAGER --list 2>&1 | grep "platforms;android-" | head -20 || echo "No platforms listed"
-            echo "=== Available build-tools ==="
-            $SDKMANAGER --list 2>&1 | grep "build-tools;" | head -10 || echo "No build-tools listed"
-            echo "=== Installed ==="
-            $SDKMANAGER --list --installed 2>&1 | head -30 || true
-          else
-            echo "No sdkmanager found"
-          fi
-
-      - name: Install SDK components
-        run: |
-          SDKMANAGER=$(find /usr/local/lib/android/sdk -name "sdkmanager" -type f 2>/dev/null | head -1)
-          if [ -n "$SDKMANAGER" ]; then
-            $SDKMANAGER --install "platforms;android-37" 2>&1 || echo "android-37 not available"
-            $SDKMANAGER --install "build-tools;37.0.0" 2>&1 || echo "build-tools 37 not available"
-          else
-            echo "No sdkmanager found, cannot install SDK components"
-          fi
-
-      - name: Verify installed platforms
-        run: |
-          ls -la /usr/local/lib/android/sdk/platforms/ 2>/dev/null || echo "No platforms dir"
-          ls -la /usr/local/lib/android/sdk/build-tools/ 2>/dev/null || echo "No build-tools dir"
+          yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses > /dev/null 2>&1 || true
+          $ANDROID_HOME/tools/bin/sdkmanager --install "platforms;android-37" 2>&1 || echo "android-37 not available"
+          $ANDROID_HOME/tools/bin/sdkmanager --install "build-tools;37.0.0" 2>&1 || echo "build-tools 37 not available"
 
       - name: Build Debug APK
         run: |
           set -o pipefail
           ./gradlew assembleGplayDebug --stacktrace --no-daemon 2>&1 | tee /tmp/gradle.log | tail -200
-          exit_code=${PIPESTATUS[0]}
-          echo "--- Gradle exit code: $exit_code ---"
-          exit $exit_code
+          exit ${PIPESTATUS[0]}
 
-      - name: Show Gradle error context
+      - name: Show error context
         if: failure()
         run: |
-          echo "::group::Last 100 lines of gradle output"
-          tail -100 /tmp/gradle.log 2>/dev/null || echo "No gradle.log found"
-          echo "::endgroup::"
-          echo "::group::Kotlin compiler errors (e: lines)"
-          grep "^e:" /tmp/gradle.log 2>/dev/null | head -30 | while IFS= read -r line; do echo "::error file=libraries/cachestore/impl::$line"; done
-          echo "::endgroup::"
-          echo "::group::All ERROR/WARNING/FAILURE lines"
-          grep -i "] error\|] failed\|compile.*error\|FAILED\|BUILD FAILED" /tmp/gradle.log 2>/dev/null | head -30
-          echo "::endgroup::"
-
-      - name: List output files
-        if: success()
-        run: |
-          echo "=== APK output tree ==="
-          find app/build/outputs -name "*.apk" 2>/dev/null || echo "No APK files found"
-          echo "=== Full output tree ==="
-          find app/build/outputs -type f 2>/dev/null | head -50 || echo "No output files"
+          grep "^e:" /tmp/gradle.log 2>/dev/null | head -20 | while IFS= read -r line; do echo "::error::$line"; done
+          tail -20 /tmp/gradle.log 2>/dev/null
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

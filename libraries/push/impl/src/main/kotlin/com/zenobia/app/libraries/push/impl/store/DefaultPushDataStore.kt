@@ -22,7 +22,7 @@ import com.zenobia.app.libraries.matrix.api.core.RoomId
 import com.zenobia.app.libraries.matrix.api.core.SessionId
 import com.zenobia.app.libraries.preferences.api.store.PreferenceDataStoreFactory
 import com.zenobia.app.libraries.push.api.history.PushHistoryItem
-import com.zenobia.app.libraries.push.impl.PushDatabase
+import com.zenobia.app.libraries.push.impl.db.PushDatabase
 import com.zenobia.app.libraries.push.impl.store.DefaultPushDataStore.Companion.BATTERY_OPTIMIZATION_BANNER_STATE_DISMISSED
 import com.zenobia.app.libraries.push.impl.store.DefaultPushDataStore.Companion.BATTERY_OPTIMIZATION_BANNER_STATE_INIT
 import com.zenobia.app.libraries.push.impl.store.DefaultPushDataStore.Companion.BATTERY_OPTIMIZATION_BANNER_STATE_SHOW

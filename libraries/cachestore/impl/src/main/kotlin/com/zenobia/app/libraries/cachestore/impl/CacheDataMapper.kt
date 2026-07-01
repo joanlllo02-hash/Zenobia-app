@@ -8,7 +8,7 @@
 package com.zenobia.app.libraries.cachestore.impl
 
 import com.zenobia.app.libraries.cachestore.api.CacheData
-import com.zenobia.app.libraries.cachestore.CacheData as DbCacheData
+import com.zenobia.app.libraries.cachestore.impl.CacheData as DbCacheData
 
 internal fun CacheData.toDbModel(key: String): DbCacheData {
     return DbCacheData(

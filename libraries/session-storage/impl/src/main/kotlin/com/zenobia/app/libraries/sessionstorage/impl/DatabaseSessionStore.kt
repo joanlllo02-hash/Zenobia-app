@@ -15,6 +15,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import com.zenobia.app.libraries.core.coroutine.CoroutineDispatchers
+import com.zenobia.app.libraries.matrix.session.SessionDatabase
 import com.zenobia.app.libraries.sessionstorage.api.LoggedInState
 import com.zenobia.app.libraries.sessionstorage.api.SessionData
 import com.zenobia.app.libraries.sessionstorage.api.SessionStore

@@ -15,7 +15,7 @@ import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.SingleIn
 import com.zenobia.app.libraries.di.annotations.ApplicationContext
-import com.zenobia.app.libraries.sessionstorage.impl.SessionDatabase
+import com.zenobia.app.libraries.matrix.session.SessionDatabase
 import io.element.encrypteddb.SqlCipherDriverFactory
 import io.element.encrypteddb.passphrase.RandomDatabaseSecretProvider
 import io.element.encrypteddb.utils.ReplaceDatabaseKey

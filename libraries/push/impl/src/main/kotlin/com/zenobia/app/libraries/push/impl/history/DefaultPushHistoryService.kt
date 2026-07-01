@@ -19,7 +19,7 @@ import com.zenobia.app.libraries.di.annotations.ApplicationContext
 import com.zenobia.app.libraries.matrix.api.core.EventId
 import com.zenobia.app.libraries.matrix.api.core.RoomId
 import com.zenobia.app.libraries.matrix.api.core.SessionId
-import com.zenobia.app.libraries.push.impl.PushDatabase
+import com.zenobia.app.libraries.push.impl.db.PushDatabase
 import com.zenobia.app.libraries.push.impl.db.PushHistory
 import com.zenobia.app.libraries.push.impl.db.PushRequest
 import com.zenobia.app.services.toolbox.api.systemclock.SystemClock
