@@ -41,22 +41,64 @@ jobs:
           echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
           echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> $GITHUB_ENV
 
-      - name: Accept licenses
-        run: yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses > /dev/null 2>&1 || true
+      - name: Find sdkmanager
+        run: |
+          find /usr/local/lib/android/sdk -name "sdkmanager" -type f 2>/dev/null || echo "sdkmanager not found"
+          ls -la /usr/local/lib/android/sdk/ 2>/dev/null || echo "SDK root not found"
 
-      - name: List installed SDK
-        run: $ANDROID_HOME/tools/bin/sdkmanager --list --verbose 2>&1 | head -50
+      - name: Accept licenses
+        run: |
+          SDKMANAGER=$(find /usr/local/lib/android/sdk -name "sdkmanager" -type f 2>/dev/null | head -1)
+          if [ -n "$SDKMANAGER" ]; then
+            yes | $SDKMANAGER --licenses > /dev/null 2>&1 || true
+          else
+            echo "No sdkmanager found, skipping license accept"
+          fi
+
+      - name: Check available platforms
+        run: |
+          SDKMANAGER=$(find /usr/local/lib/android/sdk -name "sdkmanager" -type f 2>/dev/null | head -1)
+          if [ -n "$SDKMANAGER" ]; then
+            echo "=== Available platforms ==="
+            $SDKMANAGER --list 2>&1 | grep "platforms;android-" | head -20 || echo "No platforms listed"
+            echo "=== Available build-tools ==="
+            $SDKMANAGER --list 2>&1 | grep "build-tools;" | head -10 || echo "No build-tools listed"
+            echo "=== Installed ==="
+            $SDKMANAGER --list --installed 2>&1 | head -30 || true
+          else
+            echo "No sdkmanager found"
+          fi
 
       - name: Install SDK components
         run: |
-          $ANDROID_HOME/tools/bin/sdkmanager --install "platforms;android-37" 2>&1 || echo "android-37 not available"
-          $ANDROID_HOME/tools/bin/sdkmanager --install "build-tools;37.0.0" 2>&1 || echo "build-tools 37 not available"
+          SDKMANAGER=$(find /usr/local/lib/android/sdk -name "sdkmanager" -type f 2>/dev/null | head -1)
+          if [ -n "$SDKMANAGER" ]; then
+            $SDKMANAGER --install "platforms;android-37" 2>&1 || echo "android-37 not available"
+            $SDKMANAGER --install "build-tools;37.0.0" 2>&1 || echo "build-tools 37 not available"
+          else
+            echo "No sdkmanager found, cannot install SDK components"
+          fi
 
-      - name: List installed platforms
-        run: $ANDROID_HOME/tools/bin/sdkmanager --list --installed 2>&1 | grep -E "platforms|build-tools" || true
+      - name: Verify installed platforms
+        run: |
+          ls -la /usr/local/lib/android/sdk/platforms/ 2>/dev/null || echo "No platforms dir"
+          ls -la /usr/local/lib/android/sdk/build-tools/ 2>/dev/null || echo "No build-tools dir"
 
       - name: Build Debug APK
-        run: ./gradlew assembleGplayDebug --stacktrace --no-daemon 2>&1
+        run: |
+          set -o pipefail
+          ./gradlew assembleGplayDebug --stacktrace --no-daemon 2>&1 | tee /tmp/gradle.log | tail -200
+          exit_code=${PIPESTATUS[0]}
+          echo "--- Gradle exit code: $exit_code ---"
+          exit $exit_code
+
+      - name: Show Gradle error context
+        if: failure()
+        run: |
+          echo "=== Last 50 lines of gradle output ==="
+          tail -50 /tmp/gradle.log 2>/dev/null || true
+          echo "=== Lines containing ERROR or FAILED ==="
+          grep -i "error\|failed\|FAILURE\|BUILD FAILED" /tmp/gradle.log 2>/dev/null | tail -20 || echo "No error markers found"
 
       - name: List output files
         if: success()
@@ -65,14 +107,10 @@ jobs:
           find app/build/outputs -name "*.apk" 2>/dev/null || echo "No APK files found"
           echo "=== Full output tree ==="
           find app/build/outputs -type f 2>/dev/null | head -50 || echo "No output files"
-          echo "=== Check build/intermediates ==="
-          ls -la app/build/intermediates/apk/ 2>/dev/null || echo "No intermediates/apk"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         if: success()
         with:
           name: zenobia-debug-apk
-          path: |
-            app/build/outputs/apk/**/*.apk
-            app/build/outputs/apk/*.apk
+          path: '**/*.apk'
