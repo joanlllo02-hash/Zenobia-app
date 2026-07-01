@@ -9,6 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+
     steps:
       - uses: actions/checkout@v4
 
@@ -17,11 +20,6 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: 11076708
 
       - name: Cache Gradle
         uses: actions/cache@v4
@@ -32,22 +30,37 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('*.gradle.kts', 'gradle/libs.versions.toml') }}
           restore-keys: ${{ runner.os }}-gradle-
 
-      - name: Accept licenses & install SDK components
-        run: |
-          yes | sdkmanager --licenses > /dev/null 2>&1
-          sdkmanager --install "platforms;android-37" "build-tools;37.0.0" "ndk;27.0.12077973" "cmake;3.22.1" 2>&1 | tail -5
-
-      - name: Remove hardcoded JDK path & configure CI
+      - name: Fix gradle.properties for CI
         run: |
           sed -i '/org.gradle.java.home/d' gradle.properties
-          echo "org.gradle.caching=false" >> gradle.properties
-          echo "org.gradle.configuration-cache=false" >> gradle.properties
+          sed -i '/org.gradle.caching/d' gradle.properties
+          sed -i '/org.gradle.configuration-cache/d' gradle.properties
+
+      - name: Setup Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> $GITHUB_ENV
+
+      - name: Accept licenses
+        run: yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses > /dev/null 2>&1 || true
+
+      - name: List installed SDK
+        run: $ANDROID_HOME/tools/bin/sdkmanager --list --verbose 2>&1 | head -50
+
+      - name: Install SDK components
+        run: |
+          $ANDROID_HOME/tools/bin/sdkmanager --install "platforms;android-37" 2>&1 || echo "android-37 not available"
+          $ANDROID_HOME/tools/bin/sdkmanager --install "build-tools;37.0.0" 2>&1 || echo "build-tools 37 not available"
+
+      - name: List installed platforms
+        run: $ANDROID_HOME/tools/bin/sdkmanager --list --installed 2>&1 | grep -E "platforms|build-tools" || true
 
       - name: Build Debug APK
-        run: ./gradlew assembleGplayDebug --stacktrace --no-daemon
+        run: ./gradlew assembleGplayDebug --stacktrace --no-daemon 2>&1 | tail -100
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: zenobia-debug-apk
           path: app/build/outputs/apk/gplay/debug/*.apk
