@@ -42,8 +42,12 @@ jobs:
       - name: Show error context
         if: failure()
         run: |
+          echo "=== Kotlin errors (e: prefix) ==="
           grep "^e:" /tmp/gradle.log 2>/dev/null | head -20 | while IFS= read -r line; do echo "::error::$line"; done
-          tail -20 /tmp/gradle.log 2>/dev/null
+          echo "=== Gradle failure details ==="
+          grep -E "^\*|^FAILURE:|error:" /tmp/gradle.log 2>/dev/null | head -30 | while IFS= read -r line; do echo "::error::$line"; done
+          echo "=== Last 50 lines ==="
+          tail -50 /tmp/gradle.log 2>/dev/null
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
